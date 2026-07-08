@@ -1,0 +1,63 @@
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: Format
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test with coverage
+        run: flutter test --coverage
+
+      - name: Enforce 90% line coverage
+        run: |
+          covered=$(awk -F: '/^LH:/{sum+=$2}END{print sum}' coverage/lcov.info)
+          total=$(awk -F: '/^LF:/{sum+=$2}END{print sum}' coverage/lcov.info)
+          awk -v covered="$covered" -v total="$total" 'BEGIN { if (total == 0 || covered / total < 0.90) exit 1 }'
+
+      - name: Create ephemeral CI signing key
+        run: |
+          keytool -genkeypair -keystore /tmp/durak-ci.jks -storepass changeit -keypass changeit -alias ci -keyalg RSA -keysize 2048 -validity 1 -dname "CN=CI"
+
+      - name: Compile release APK
+        env:
+          RELEASE_STORE_FILE: /tmp/durak-ci.jks
+          RELEASE_STORE_PASSWORD: changeit
+          RELEASE_KEY_ALIAS: ci
+          RELEASE_KEY_PASSWORD: changeit
+        run: flutter build apk --release

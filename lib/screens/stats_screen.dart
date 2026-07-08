@@ -1,73 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/game_provider.dart';
+import '../l10n/app_strings.dart';
+import '../providers/stats_provider.dart';
 import '../utils/constants.dart';
 
+/// Экран статистики партий. Читает данные из отдельного [StatsNotifier].
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(gameStateProvider);
-
-    final winRate = gameState.gamesPlayed > 0
-        ? ((gameState.playerWins / gameState.gamesPlayed) * 100)
-            .toStringAsFixed(1)
-        : '0.0';
+    final stats = ref.watch(statsNotifierProvider);
+    final winRate = stats.winRate.toStringAsFixed(1);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppConstants.primaryColor,
-        title: const Text('Статистика'),
+        title: const Text(AppStrings.statistics),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
           _buildStatCard(
-            'Всего игр',
-            '${gameState.gamesPlayed}',
+            AppStrings.statsTotalGames,
+            '${stats.gamesPlayed}',
             Icons.games,
             Colors.blue,
           ),
           const SizedBox(height: 16),
           _buildStatCard(
-            'Победы',
-            '${gameState.playerWins}',
+            AppStrings.statsWins,
+            '${stats.playerWins}',
             Icons.emoji_events,
             Colors.green,
           ),
           const SizedBox(height: 16),
           _buildStatCard(
-            'Поражения',
-            '${gameState.computerWins}',
+            AppStrings.statsLosses,
+            '${stats.computerWins}',
             Icons.sentiment_dissatisfied,
             Colors.red,
           ),
           const SizedBox(height: 16),
           _buildStatCard(
-            'Ничьи',
-            '${gameState.draws}',
+            AppStrings.statsDraws,
+            '${stats.draws}',
             Icons.handshake_outlined,
             Colors.tealAccent,
           ),
           const SizedBox(height: 16),
           _buildStatCard(
-            'Процент побед',
+            AppStrings.statsWinRate,
             '$winRate%',
             Icons.percent,
             Colors.amber,
           ),
           const SizedBox(height: 16),
           _buildStatCard(
-            'Текущая серия',
-            '${gameState.winStreak}',
+            AppStrings.statsCurrentStreak,
+            '${stats.winStreak}',
             Icons.local_fire_department,
             Colors.orange,
           ),
           const SizedBox(height: 16),
           _buildStatCard(
-            'Лучшая серия',
-            '${gameState.bestWinStreak}',
+            AppStrings.statsBestStreak,
+            '${stats.bestWinStreak}',
             Icons.star,
             Colors.purple,
           ),

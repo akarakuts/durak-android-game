@@ -28,7 +28,7 @@ English: [README.md](README.md)
 
 ## CI (GitHub Actions)
 
-Как в англ. README: [CI](.github/workflows/ci.yml) (`flutter analyze`, `flutter test`, сборка APK), [Security](.github/workflows/security.yml) (OSV + CodeQL), [Release](.github/workflows/release.yml) по тегу `v*` (подписанные APK/AAB в GitHub Release). Секреты и подпись — в [README.md](README.md#release-signing). [Dependabot](.github/dependabot.yml) — еженедельные PR по pub и Actions.
+Как в англ. README: [Quality](.github/workflows/quality.yml) (`dart format`, `flutter analyze`, тесты + coverage, сборка APK), [Security](.github/workflows/security.yml) (OSV + CodeQL), [Release](.github/workflows/release.yml) по тегу `v*` (подписанные APK/AAB в GitHub Release). Секреты и подпись — в [README.md](README.md#release-signing). [Dependabot](.github/dependabot.yml) — еженедельные PR по pub и Actions.
 
 **Тесты:** правила игры, ИИ, провайдер (отмена таймера), статистика — каталог `test/`. Подробнее — раздел Testing в [README.md](README.md#testing).
 

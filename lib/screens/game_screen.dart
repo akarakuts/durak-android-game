@@ -1,14 +1,17 @@
+// Экран партии: стол, руки, баннер хода и кнопки действий.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/card.dart';
 import '../models/game.dart';
 import '../providers/game_provider.dart';
+import '../l10n/app_strings.dart';
 import '../utils/constants.dart';
 import '../widgets/card_widget.dart';
 import '../widgets/game_controls.dart';
 import '../widgets/hand_widget.dart';
 import '../widgets/table_widget.dart';
 
+/// Игровой экран; читает [gameStateProvider] и делегирует ходы в [GameStateNotifier].
 class GameScreen extends ConsumerWidget {
   const GameScreen({super.key});
 
@@ -18,33 +21,42 @@ class GameScreen extends ConsumerWidget {
     final notifier = ref.read(gameStateProvider.notifier);
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            _header(context, state),
-            _computerHand(state),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 260),
-                child: _tableArea(state, notifier),
-              ),
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              child: _turnBanner(state),
-            ),
-            _humanHand(state, notifier),
-            GameControls(
-              phase: state.phase,
-              isHumanTurn: state.isHumanTurn,
-              canPass: state.canPass,
-              onTakeCards:
-                  state.phase == GamePhase.defending && state.isHumanTurn
-                      ? notifier.humanTakeCards
-                      : null,
-              onPass: state.canPass ? notifier.humanPass : null,
-              onNewGame: notifier.startNewGame,
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 500;
+            return Column(
+              children: [
+                _header(context, state),
+                if (!compact) _computerHand(state),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 260),
+                    child: _tableArea(state, notifier),
+                  ),
+                ),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  child: _turnBanner(state),
+                ),
+                _humanHand(state, notifier, compact: compact),
+                GameControls(
+                  phase: state.phase,
+                  isHumanTurn: state.isHumanTurn,
+                  canPass: state.canPass,
+                  onTakeCards:
+                      state.phase == GamePhase.defending && state.isHumanTurn
+                          ? notifier.humanTakeCards
+                          : null,
+                  onPass: state.canHumanFinishThrowIn
+                      ? notifier.humanFinishThrowIn
+                      : state.canPass
+                          ? notifier.humanPass
+                          : null,
+                  onNewGame: notifier.startNewGame,
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -56,7 +68,7 @@ class GameScreen extends ConsumerWidget {
       child: Row(
         children: [
           IconButton(
-            tooltip: 'В меню',
+            tooltip: AppStrings.toMenu,
             onPressed: () => Navigator.pushReplacementNamed(context, '/'),
             icon: const Icon(Icons.close_rounded),
           ),
@@ -79,11 +91,11 @@ class GameScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Компьютер',
+                  AppStrings.computerPlayerName,
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                 ),
                 Text(
-                  '${state.computerPlayer.cardCount} карт',
+                  AppStrings.cardsCount(state.computerPlayer.cardCount),
                   style: const TextStyle(color: Colors.white60, fontSize: 12),
                 ),
               ],
@@ -114,8 +126,10 @@ class GameScreen extends ConsumerWidget {
         children: [
           Icon(icon, size: 15, color: color),
           const SizedBox(width: 5),
-          Text(value,
-              style: TextStyle(color: color, fontWeight: FontWeight.w700)),
+          Text(
+            value,
+            style: TextStyle(color: color, fontWeight: FontWeight.w700),
+          ),
         ],
       ),
     );
@@ -171,15 +185,17 @@ class GameScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               won
-                  ? 'Победа!'
+                  ? AppStrings.victory
                   : draw
-                      ? 'Ничья'
-                      : 'В этот раз — компьютер',
+                      ? AppStrings.draw
+                      : AppStrings.computerWon,
               style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 6),
-            Text(draw ? 'Карты закончились одновременно' : 'Хорошая партия',
-                style: const TextStyle(color: Colors.white60)),
+            Text(
+              draw ? AppStrings.drawDetail : AppStrings.goodGame,
+              style: const TextStyle(color: Colors.white60),
+            ),
           ],
         ),
       );
@@ -207,8 +223,10 @@ class GameScreen extends ConsumerWidget {
   Widget _deckAndTrump(GameState state) {
     final trump = state.deck.trumpCard;
     return Semantics(
-      label:
-          'В колоде ${state.deck.remainingCards} карт. Козырь ${trump ?? ''}',
+      label: AppStrings.deckSemantic(
+        state.deck.remainingCards,
+        trump?.toString() ?? '',
+      ),
       child: SizedBox(
         width: 112,
         height: 82,
@@ -266,22 +284,34 @@ class GameScreen extends ConsumerWidget {
         switch ((state.phase, state.isHumanTurn)) {
       (GamePhase.attacking, true) => (
           Icons.sports_esports_rounded,
-          'Ваш ход · Атака',
+          AppStrings.turnAttack,
           state.tableCards.isEmpty
-              ? 'Выберите карту'
-              : 'Подкиньте или нажмите «Пас»',
+              ? AppStrings.turnAttackHintFirst
+              : AppStrings.turnAttackHintMore,
           AppConstants.accentColor,
         ),
       (GamePhase.defending, true) => (
           Icons.shield_outlined,
-          'Ваш ход · Защита',
-          'Отбейте карту или возьмите',
+          AppStrings.turnDefense,
+          AppStrings.turnDefenseHint,
           AppConstants.warmColor,
+        ),
+      (GamePhase.taking, true) => (
+          Icons.add_circle_outline_rounded,
+          AppStrings.turnThrowIn,
+          AppStrings.turnThrowInHint,
+          AppConstants.warmColor,
+        ),
+      (GamePhase.taking, false) => (
+          Icons.hourglass_top_rounded,
+          AppStrings.computerTurn,
+          AppStrings.computerThrowingIn,
+          Colors.white54,
         ),
       _ => (
           Icons.hourglass_top_rounded,
-          'Ход компьютера',
-          'Соперник думает…',
+          AppStrings.computerTurn,
+          AppStrings.computerThinking,
           Colors.white54,
         ),
     };
@@ -301,12 +331,14 @@ class GameScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style:
-                        TextStyle(color: color, fontWeight: FontWeight.w800)),
-                Text(subtitle,
-                    style:
-                        const TextStyle(color: Colors.white60, fontSize: 12)),
+                Text(
+                  title,
+                  style: TextStyle(color: color, fontWeight: FontWeight.w800),
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -315,19 +347,28 @@ class GameScreen extends ConsumerWidget {
     );
   }
 
-  Widget _humanHand(GameState state, GameStateNotifier notifier) {
+  Widget _humanHand(
+    GameState state,
+    GameStateNotifier notifier, {
+    bool compact = false,
+  }) {
     final canInteract = state.result == GameResult.none &&
         state.isHumanTurn &&
         (state.phase == GamePhase.attacking ||
-            state.phase == GamePhase.defending);
+            state.phase == GamePhase.defending ||
+            state.phase == GamePhase.taking);
     return HandWidget(
       cards: state.humanPlayer.hand,
       isPlayable: canInteract,
       playableCards: state.playableCards,
+      compact: compact,
       onCardTap: canInteract
-          ? (card) => state.phase == GamePhase.attacking
-              ? notifier.humanAttack(card)
-              : notifier.humanDefend(card)
+          ? (card) => switch (state.phase) {
+                GamePhase.attacking => notifier.humanAttack(card),
+                GamePhase.defending => notifier.humanDefend(card),
+                GamePhase.taking => notifier.humanThrowIn(card),
+                _ => null,
+              }
           : null,
     );
   }

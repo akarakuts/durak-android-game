@@ -29,9 +29,8 @@ if [[ ! -f "$PROJ_ROOT/keystore.properties" ]]; then
   echo "build_release: keystore.properties не найден — release с debug-подписью (не для публикации)" >&2
 fi
 
-version_name="$(
-  sed -n 's/^version:[[:space:]]*\([0-9].*\)/\1/p' pubspec.yaml | head -1 | awk '{print $1}'
-)"
+version_line="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | head -1)"
+version_name="${version_line%%+*}"
 if [[ -z "$version_name" ]]; then
   echo "build_release: не удалось прочитать version из pubspec.yaml" >&2
   exit 1
@@ -39,7 +38,13 @@ fi
 
 flutter pub get
 flutter build apk --release
-flutter build appbundle --release
+flutter build appbundle --release || {
+  if [[ ! -f build/app/outputs/bundle/release/app-release.aab ]]; then
+    echo "build_release: сборка AAB не удалась" >&2
+    exit 1
+  fi
+  echo "build_release: Flutter предупредил о debug symbols — AAB на месте, продолжаем" >&2
+}
 
 apk_src="build/app/outputs/flutter-apk/app-release.apk"
 aab_src="build/app/outputs/bundle/release/app-release.aab"
@@ -53,8 +58,8 @@ if [[ ! -f "$aab_src" ]]; then
 fi
 
 mkdir -p "$OUT"
-apk_dst="$OUT/durak-${version_name}.apk"
-aab_dst="$OUT/durak-${version_name}.aab"
+apk_dst="$OUT/durak-${version_name}-release.apk"
+aab_dst="$OUT/durak-${version_name}-release.aab"
 cp -f "$apk_src" "$apk_dst"
 cp -f "$aab_src" "$aab_dst"
 

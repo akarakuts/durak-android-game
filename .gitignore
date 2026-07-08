@@ -16,6 +16,7 @@
 **/android/**/local.properties
 **/.gradle/
 **/android/.gradle/
+**/android/build/
 **/android/**/captures/
 .externalNativeBuild/
 .cxx/
@@ -29,6 +30,9 @@
 # OS ---
 .DS_Store
 Thumbs.db
+* 2.*
+* 2/
+* 3.*
 
 # Logs / heap dumps
 *.log
