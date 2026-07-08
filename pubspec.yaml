@@ -1,7 +1,7 @@
 name: durak_game
 description: Podkidnoy Durak — classic Russian card game for Android
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.3+3
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.3] - 2026-07-08
+
+### Fixed
+
+- Centered home screen layout (hero, title, menu buttons).
+- Store screenshot capture: correct rules dialog and menu tap coordinates.
+
 ## [1.0.0] - 2026-07-08
 
 ### Added

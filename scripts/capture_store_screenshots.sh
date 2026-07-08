@@ -62,19 +62,28 @@ tap_by_label() {
   coords="$(
     python3 - "$label" <<'PY'
 import re, sys
+import xml.etree.ElementTree as ET
+
 label = sys.argv[1]
 try:
-    xml = open("/tmp/durak-ui.xml", encoding="utf-8", errors="replace").read()
-except OSError:
+    root = ET.parse("/tmp/durak-ui.xml").getroot()
+except (OSError, ET.ParseError):
     sys.exit(0)
-for m in re.finditer(
-    r'(?:text|content-desc)="([^"]*)"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', xml
-):
-    if m.group(1) == label:
-        x = (int(m.group(2)) + int(m.group(4))) // 2
-        y = (int(m.group(3)) + int(m.group(5))) // 2
-        print(f"{x} {y}")
-        break
+
+bounds_re = re.compile(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]")
+for node in root.iter("node"):
+    text = node.attrib.get("text", "")
+    desc = node.attrib.get("content-desc", "")
+    if text != label and desc != label:
+        continue
+    bounds = node.attrib.get("bounds", "")
+    m = bounds_re.search(bounds)
+    if not m:
+        continue
+    x = (int(m.group(1)) + int(m.group(3))) // 2
+    y = (int(m.group(2)) + int(m.group(4))) // 2
+    print(f"{x} {y}")
+    break
 PY
   )"
   if [[ -n "$coords" ]]; then
@@ -153,24 +162,24 @@ fresh_home
 cap "$OUT/01_ru_home.png"
 
 fresh_home
-tap_menu "Новая игра" 540 1480
+tap_menu "Новая игра" 540 1368
 sleep 2
 cap "$OUT/02_ru_game.png"
 
 fresh_home
-tap_menu "Новая игра" 540 1480
+tap_menu "Новая игра" 540 1368
 sleep 2
 adb shell input tap 320 2140
 sleep 1
 cap "$OUT/03_ru_gameplay.png"
 
 fresh_home
-tap_menu "Статистика" 540 1560
+tap_menu "Статистика" 540 1547
 sleep 1.5
 cap "$OUT/04_ru_statistics.png"
 
 fresh_home
-tap_menu "Правила" 540 1640
+tap_menu "Правила" 540 1726
 sleep 1.2
 cap "$OUT/05_ru_rules.png"
 
