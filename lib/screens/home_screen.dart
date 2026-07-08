@@ -32,8 +32,10 @@ class HomeScreen extends ConsumerWidget {
               constraints: BoxConstraints(
                 minHeight:
                     (constraints.maxHeight - 40).clamp(0, double.infinity),
+                maxWidth: constraints.maxWidth,
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const HomeHeroWidget(),
@@ -55,11 +57,15 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    AppStrings.homeSubtitle,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      AppStrings.homeSubtitle,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 48),
@@ -117,26 +123,29 @@ class HomeScreen extends ConsumerWidget {
     VoidCallback onPressed, {
     bool primary = false,
   }) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 280),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton.icon(
-          onPressed: onPressed,
-          icon: Icon(icon, size: 28),
-          label: Text(
-            text,
-            style: const TextStyle(fontSize: 18),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: primary
-                ? AppConstants.accentColor
-                : Colors.white.withValues(alpha: 0.1),
-            foregroundColor:
-                primary ? const Color(0xFF052F2C) : AppConstants.ivoryColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+    return Align(
+      alignment: Alignment.center,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 280),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton.icon(
+            onPressed: onPressed,
+            icon: Icon(icon, size: 28),
+            label: Text(
+              text,
+              style: const TextStyle(fontSize: 18),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primary
+                  ? AppConstants.accentColor
+                  : Colors.white.withValues(alpha: 0.1),
+              foregroundColor:
+                  primary ? const Color(0xFF052F2C) : AppConstants.ivoryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
           ),
         ),
