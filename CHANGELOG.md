@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.4] - 2026-07-08
+
+### Fixed
+
+- GitHub Security workflow: CodeQL scans Android Java/Kotlin (Dart is unsupported).
+
 ## [1.0.3] - 2026-07-08
 
 ### Fixed
