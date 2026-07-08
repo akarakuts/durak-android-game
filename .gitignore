@@ -1,0 +1,52 @@
+# --- Flutter / Dart ---
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Local SDK/tooling caches (not part of the repo)
+.flutter-sdk/
+.android-sdk/
+.home/
+
+# --- Android / Gradle ---
+**/android/**/local.properties
+**/.gradle/
+**/android/.gradle/
+**/android/**/captures/
+.externalNativeBuild/
+.cxx/
+.kotlin/
+
+# IDE (Android Studio / IntelliJ / VS Code)
+.idea/
+.vscode/
+*.iml
+
+# OS ---
+.DS_Store
+Thumbs.db
+
+# Logs / heap dumps
+*.log
+*.hprof
+
+# Release upload keystore (never commit secrets or binary keystore)
+keystore.properties
+upload-keystore.jks
+*.jks
+*.keystore
+
+# Cursor rules (may contain local publish paths)
+.cursor/
+
+# Local store / screenshot directories (see *.example)
+store-upload.dir
+store-copy.dir
+
+# Store listing assets and local design audits
+/docs/
+design/audit/

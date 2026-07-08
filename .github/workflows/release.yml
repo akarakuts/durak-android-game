@@ -1,0 +1,99 @@
+# Push tag v*: OSV scan → signed release APK + AAB → GitHub Release.
+# Signing uses upload keystore from GitHub Actions secrets (see README).
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.5"
+
+jobs:
+  osv-scan:
+    name: OSV (pre-release)
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.8
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    with:
+      fail-on-vuln: false
+      scan-args: |-
+        --lockfile=pubspec.lock
+        --recursive
+        ./
+
+  build-and-publish:
+    name: Build signed APK/AAB and publish GitHub Release
+    needs: osv-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Prepare upload keystore (from secrets)
+        env:
+          KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: bash .github/scripts/prepare-release-signing.sh
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Build signed release APK and AAB
+        run: |
+          flutter pub get
+          flutter build apk --release
+          flutter build appbundle --release
+
+      - name: Stage artifacts for upload
+        id: art
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          APK_SRC="build/app/outputs/flutter-apk/app-release.apk"
+          AAB_SRC="build/app/outputs/bundle/release/app-release.aab"
+          if [[ ! -f "$APK_SRC" ]]; then
+            echo "APK not found: $APK_SRC"
+            exit 1
+          fi
+          if [[ ! -f "$AAB_SRC" ]]; then
+            echo "AAB not found: $AAB_SRC"
+            exit 1
+          fi
+          APK_OUT="durak-${TAG}.apk"
+          AAB_OUT="durak-${TAG}.aab"
+          cp "$APK_SRC" "$APK_OUT"
+          cp "$AAB_SRC" "$AAB_OUT"
+          echo "apk=$APK_OUT" >> "$GITHUB_OUTPUT"
+          echo "aab=$AAB_OUT" >> "$GITHUB_OUTPUT"
+          ls -la "$APK_OUT" "$AAB_OUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            ${{ steps.art.outputs.apk }}
+            ${{ steps.art.outputs.aab }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true

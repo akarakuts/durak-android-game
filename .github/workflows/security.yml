@@ -1,0 +1,69 @@
+# OSV dependency scan + CodeQL on pushes and PRs to main (scheduled weekly).
+name: Security
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 12 * * 1"
+
+env:
+  FLUTTER_VERSION: "3.44.5"
+
+jobs:
+  osv:
+    name: OSV dependency scan
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.8
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    with:
+      fail-on-vuln: false
+      scan-args: |-
+        --lockfile=pubspec.lock
+        --recursive
+        ./
+
+  codeql:
+    name: CodeQL (Dart)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: dart
+          build-mode: manual
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Build debug (tracing for CodeQL)
+        run: |
+          flutter pub get
+          flutter build apk --debug
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
