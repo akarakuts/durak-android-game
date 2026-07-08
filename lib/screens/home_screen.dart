@@ -47,9 +47,9 @@ class HomeScreen extends ConsumerWidget {
                     children: [
                       const Center(child: HomeHeroWidget()),
                       const SizedBox(height: 24),
-                      SizedBox(
+                      const SizedBox(
                         width: double.infinity,
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 24),
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
