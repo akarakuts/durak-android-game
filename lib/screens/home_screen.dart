@@ -42,85 +42,85 @@ class HomeScreen extends ConsumerWidget {
                     vertical: 20,
                   ),
                   child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Center(child: HomeHeroWidget()),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            AppStrings.homeTitle,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              letterSpacing: 0.5,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Center(child: HomeHeroWidget()),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              AppStrings.homeTitle,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Text(
-                          AppStrings.homeSubtitle,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white.withValues(alpha: 0.8),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Text(
+                            AppStrings.homeSubtitle,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  const SizedBox(height: 48),
-                  if (hasActiveGame) ...[
-                    _buildMenuButton(
-                      context,
-                      AppStrings.continueGame,
-                      Icons.play_arrow_rounded,
-                      () => unawaited(
-                        Navigator.pushReplacementNamed(context, '/game'),
+                      const SizedBox(height: 48),
+                      if (hasActiveGame) ...[
+                        _buildMenuButton(
+                          context,
+                          AppStrings.continueGame,
+                          Icons.play_arrow_rounded,
+                          () => unawaited(
+                            Navigator.pushReplacementNamed(context, '/game'),
+                          ),
+                          primary: true,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      _buildMenuButton(
+                        context,
+                        AppStrings.newGame,
+                        Icons.refresh_rounded,
+                        () {
+                          notifier.startNewGame();
+                          unawaited(
+                            Navigator.pushReplacementNamed(context, '/game'),
+                          );
+                        },
+                        primary: !hasActiveGame,
                       ),
-                      primary: true,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  _buildMenuButton(
-                    context,
-                    AppStrings.newGame,
-                    Icons.refresh_rounded,
-                    () {
-                      notifier.startNewGame();
-                      unawaited(
-                        Navigator.pushReplacementNamed(context, '/game'),
-                      );
-                    },
-                    primary: !hasActiveGame,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildMenuButton(
-                    context,
-                    AppStrings.statistics,
-                    Icons.bar_chart,
-                    () => unawaited(Navigator.pushNamed(context, '/stats')),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildMenuButton(
-                    context,
-                    AppStrings.rules,
-                    Icons.help_outline,
-                    () => _showRules(context),
-                  ),
-                ],
+                      const SizedBox(height: 12),
+                      _buildMenuButton(
+                        context,
+                        AppStrings.statistics,
+                        Icons.bar_chart,
+                        () => unawaited(Navigator.pushNamed(context, '/stats')),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildMenuButton(
+                        context,
+                        AppStrings.rules,
+                        Icons.help_outline,
+                        () => _showRules(context),
+                      ),
+                    ],
                   ),
                 ),
               ),
