@@ -1,7 +1,10 @@
+// Нижняя панель действий: взять карты, пас, новая игра.
 import 'package:flutter/material.dart';
 import '../models/game.dart';
+import '../l10n/app_strings.dart';
 import '../utils/constants.dart';
 
+/// Кнопка действия в зависимости от [GamePhase] и чья очередь ходить.
 class GameControls extends StatelessWidget {
   final GamePhase phase;
   final bool isHumanTurn;
@@ -23,18 +26,25 @@ class GameControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (phase == GamePhase.gameOver) {
-      return _button(Icons.refresh_rounded, 'Новая игра', onNewGame);
+      return _button(Icons.refresh_rounded, AppStrings.newGame, onNewGame);
     }
     if (phase == GamePhase.defending && isHumanTurn) {
       return _button(
         Icons.file_download_outlined,
-        'Взять карты',
+        AppStrings.takeCards,
         onTakeCards,
         danger: true,
       );
     }
+    if (phase == GamePhase.taking && isHumanTurn) {
+      return _button(
+        Icons.done_rounded,
+        AppStrings.finishThrowIn,
+        onPass,
+      );
+    }
     if (phase == GamePhase.attacking && isHumanTurn && canPass) {
-      return _button(Icons.done_all_rounded, 'Бито · Пас', onPass);
+      return _button(Icons.done_all_rounded, AppStrings.pass, onPass);
     }
     return const SizedBox(height: 52);
   }

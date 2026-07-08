@@ -9,8 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^2.4.9
+  flutter_riverpod: ^3.0.0
   shared_preferences: ^2.2.2
+  meta: ^1.18.0
 
 dev_dependencies:
   flutter_test:

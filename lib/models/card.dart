@@ -1,7 +1,13 @@
+/// Масть игральной карты.
 enum Suit { clubs, diamonds, hearts, spades }
 
+/// Достоинство карты от шестёрки до туза.
 enum Rank { six, seven, eight, nine, ten, jack, queen, king, ace }
 
+/// Неизменяемая игральная карта.
+///
+/// Равенство и хэш определяются только мастью и рангом ([faceUp]
+/// не влияет), что удобно для игровых проверок.
 class PlayingCard {
   final Suit suit;
   final Rank rank;

@@ -1,67 +1,66 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Provider;
+import 'package:flutter_riverpod/legacy.dart';
 import '../models/card.dart';
 import '../models/game.dart';
 import '../services/game_service.dart';
-import '../services/stats_service.dart';
+import 'stats_provider.dart';
+import '../utils/game_rules.dart';
 
+/// Провайдер [GameService] с правилами игры.
 final gameServiceProvider = Provider<GameService>((ref) => GameService());
-final statsServiceProvider = Provider<StatsService>((ref) => StatsService());
 
+/// Текущее состояние партии и нотифаер, управляющий ходами.
 final gameStateProvider =
     StateNotifierProvider<GameStateNotifier, GameState>((ref) {
   return GameStateNotifier(
     ref.read(gameServiceProvider),
-    ref.read(statsServiceProvider),
+    ref.read(statsNotifierProvider.notifier),
   );
 });
 
+/// Управляет жизненным циклом партии и связывает [GameService] с Riverpod.
+///
+/// Статистику партий ведёт отдельный [StatsNotifier]; этот нотифаер лишь
+/// сообщает ему о завершении партии.
 class GameStateNotifier extends StateNotifier<GameState> {
   final GameService _gameService;
-  final StatsService _statsService;
+  final StatsNotifier _statsNotifier;
   Timer? _pendingComputerAction;
   int _gameGeneration = 0;
-  int _lastSavedGames = 0;
-  bool _statsLoaded = false;
 
-  GameStateNotifier(this._gameService, this._statsService)
-      : super(GameState()) {
-    startNewGame();
-    _restoreStats();
-  }
+  GameStateNotifier(this._gameService, this._statsNotifier)
+      : super(GameState());
 
+  /// Начинает новую партию.
   void startNewGame() {
     _pendingComputerAction?.cancel();
     _gameGeneration++;
-    final next = GameState(
-      gamesPlayed: state.gamesPlayed,
-      playerWins: state.playerWins,
-      computerWins: state.computerWins,
-      draws: state.draws,
-      winStreak: state.winStreak,
-      bestWinStreak: state.bestWinStreak,
-    );
-    _gameService.startNewGame(next);
-    state = next;
+    state = _gameService.startNewGame(GameState());
 
     if (!state.isHumanTurn) {
-      _scheduleComputerAction(_computerTurn, delay: 500);
+      _scheduleComputerAction(
+        _computerTurn,
+        delay: GameRules.computerFirstMoveDelayMs,
+      );
     }
   }
 
+  /// Ход человека в атаке.
   void humanAttack(PlayingCard card) {
     if (state.phase != GamePhase.attacking || !state.isHumanTurn) return;
-    _apply((next) => _gameService.humanAttack(next, card));
+    _apply((s) => _gameService.humanAttack(s, card));
 
     if (state.result != GameResult.none) return;
 
     _scheduleComputerAction(_computerDefend);
   }
 
+  /// Ход человека в защите.
   void humanDefend(PlayingCard card) {
     if (state.phase != GamePhase.defending || !state.isHumanTurn) return;
-    _apply((next) => _gameService.humanDefend(next, card));
+    _apply((s) => _gameService.humanDefend(s, card));
 
     if (state.result != GameResult.none) return;
 
@@ -70,6 +69,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     }
   }
 
+  /// Человек забирает карты со стола.
   void humanTakeCards() {
     if (state.phase != GamePhase.defending || !state.isHumanTurn) return;
     _apply(_gameService.humanTakeCards);
@@ -79,34 +79,49 @@ class GameStateNotifier extends StateNotifier<GameState> {
     _scheduleComputerAction(_computerTurn);
   }
 
+  /// Докидывает карту компьютеру, который решил забрать стол.
+  void humanThrowIn(PlayingCard card) {
+    if (!state.canHumanFinishThrowIn) return;
+    _apply((s) => _gameService.humanThrowIn(s, card));
+  }
+
+  /// Завершает докидывание и начинает следующий раунд.
+  void humanFinishThrowIn() {
+    if (!state.canHumanFinishThrowIn) return;
+    _apply(_gameService.humanFinishThrowIn);
+  }
+
+  /// Человек пасует.
   void humanPass() {
     if (state.phase != GamePhase.attacking || !state.isHumanTurn) return;
     _apply(_gameService.humanPass);
+
+    if (state.result != GameResult.none) return;
 
     if (!state.isHumanTurn) {
       _scheduleComputerAction(_computerTurn);
     }
   }
 
+  /// Один шаг хода компьютера (атака или защита — по ситуации).
   void _computerTurn() {
     if (state.result != GameResult.none) return;
-
     if (state.isHumanTurn) return;
 
-    if (state.tableCards.isEmpty ||
+    if (state.phase == GamePhase.taking) {
+      _apply(_gameService.computerThrowIn);
+      if (state.result == GameResult.none && !state.isHumanTurn) {
+        _scheduleComputerAction(_computerTurn);
+      }
+    } else if (state.tableCards.isEmpty ||
         state.tableCards.every((tc) => tc.isDefended)) {
       _apply(_gameService.computerAttack);
     } else {
       _apply(_gameService.computerDefend);
     }
-
-    if (state.result != GameResult.none) return;
-
-    if (state.isHumanTurn && state.phase == GamePhase.attacking) {
-      // Human's turn to attack
-    }
   }
 
+  /// Шаг защиты компьютера после атаки человека.
   void _computerDefend() {
     if (state.result != GameResult.none) return;
     if (state.isHumanTurn) return;
@@ -116,61 +131,32 @@ class GameStateNotifier extends StateNotifier<GameState> {
     if (state.result != GameResult.none) return;
 
     if (state.isHumanTurn && state.phase == GamePhase.attacking) {
-      // Human attacks again after successful defense
-    } else if (!state.isHumanTurn) {
+      // Атака снова переходит к человеку после успешного отбоя.
+      return;
+    }
+    if (!state.isHumanTurn) {
       _scheduleComputerAction(_computerTurn);
     }
   }
 
-  void _apply(void Function(GameState) action) {
-    final next = GameState.copy(state);
-    action(next);
-    state = next;
-    if (_statsLoaded && state.gamesPlayed != _lastSavedGames) {
-      _lastSavedGames = state.gamesPlayed;
-      _saveStats();
+  /// Применяет к состоянию чистую функцию [action] и фиксирует итог партии.
+  void _apply(GameState Function(GameState) action) {
+    final previous = state;
+    state = action(state);
+    if (state.result != GameResult.none && previous.result == GameResult.none) {
+      _statsNotifier.recordResult(state.result);
     }
   }
 
   void _scheduleComputerAction(
     void Function() action, {
-    int delay = 800,
+    int delay = GameRules.computerActionDelayMs,
   }) {
     _pendingComputerAction?.cancel();
     final generation = _gameGeneration;
     _pendingComputerAction = Timer(Duration(milliseconds: delay), () {
       if (generation == _gameGeneration && mounted) action();
     });
-  }
-
-  Future<void> _restoreStats() async {
-    SavedStats stats;
-    try {
-      stats = await _statsService.load();
-    } catch (_) {
-      _statsLoaded = true;
-      return;
-    }
-    if (!mounted) return;
-    final next = GameState.copy(state)
-      ..gamesPlayed += stats.gamesPlayed
-      ..playerWins += stats.playerWins
-      ..computerWins += stats.computerWins
-      ..draws += stats.draws
-      ..winStreak = state.gamesPlayed == 0 ? stats.winStreak : state.winStreak
-      ..bestWinStreak = state.bestWinStreak > stats.bestWinStreak
-          ? state.bestWinStreak
-          : stats.bestWinStreak;
-    state = next;
-    _statsLoaded = true;
-    _lastSavedGames = state.gamesPlayed;
-    if (state.gamesPlayed > stats.gamesPlayed) {
-      _saveStats();
-    }
-  }
-
-  void _saveStats() {
-    unawaited(_statsService.save(state).catchError((_) {}));
   }
 
   @override

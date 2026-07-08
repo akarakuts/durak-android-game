@@ -1,11 +1,14 @@
+// Стол: пары атака/защита и горизонтальная прокрутка при длинном раунде.
 import 'package:flutter/material.dart';
 import '../models/game.dart';
 import 'card_widget.dart';
+import '../l10n/app_strings.dart';
 import '../utils/constants.dart';
 
+/// Список [TableCard] на столе; пустое состояние — подсказка первого хода.
 class TableWidget extends StatelessWidget {
   final List<TableCard> tableCards;
-  final Function()? onDefend;
+  final VoidCallback? onDefend;
 
   const TableWidget({
     super.key,
@@ -24,7 +27,7 @@ class TableWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
           ),
           child: const Text(
-            'Выберите карту для первого хода',
+            AppStrings.tableEmptyHint,
             style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
         ),

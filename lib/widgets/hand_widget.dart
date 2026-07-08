@@ -1,12 +1,15 @@
+// Веер карт в руке игрока с overlap и подсветкой доступных ходов.
 import 'package:flutter/material.dart';
 import '../models/card.dart';
 import 'card_widget.dart';
 
+/// Горизонтальный веер [CardWidget] с адаптивным шагом и наклоном.
 class HandWidget extends StatelessWidget {
   final List<PlayingCard> cards;
-  final Function(PlayingCard)? onCardTap;
+  final ValueChanged<PlayingCard>? onCardTap;
   final bool isPlayable;
   final List<PlayingCard> playableCards;
+  final bool compact;
 
   const HandWidget({
     super.key,
@@ -14,16 +17,17 @@ class HandWidget extends StatelessWidget {
     this.onCardTap,
     this.isPlayable = false,
     this.playableCards = const [],
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 132,
+      height: compact ? 108 : 132,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          const cardWidth = 76.0;
-          const cardHeight = 112.0;
+          final cardWidth = compact ? 62.0 : 76.0;
+          final cardHeight = compact ? 92.0 : 112.0;
           final step = cards.length <= 1
               ? cardWidth
               : ((constraints.maxWidth - cardWidth - 24) / (cards.length - 1))

@@ -36,7 +36,7 @@ See `pubspec.yaml` for SDK and dependency versions.
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| [CI](.github/workflows/ci.yml) | push / PR to `main`, manual | `flutter analyze`, `flutter test`, release APK build |
+| [Quality](.github/workflows/quality.yml) | push / PR to `main`, manual | `dart format`, `flutter analyze`, tests + coverage, release APK build |
 | [Security](.github/workflows/security.yml) | push / PR to `main`, weekly | OSV dependency scan, CodeQL (Dart) |
 | [Release](.github/workflows/release.yml) | tag `v*` | Upload-keystore–signed **APK + AAB** + GitHub Release (requires secrets) |
 
@@ -136,6 +136,8 @@ flutter test
 | Script | Purpose |
 |--------|---------|
 | `scripts/build_release.sh` | Signed APK/AAB → path from `store-upload.dir` (see `store-upload.dir.example`) |
+| `scripts/capture_store_screenshots.sh` | Store screenshots 1080×1920 → `docs/store-screenshots/` (+ optional `store-copy.dir`) |
+| `scripts/generate_launcher_icons.sh` | Regenerate mipmap PNG + `docs/rustore/ic_launcher_store_512.png` from `design/app-icon.svg` |
 
 ## Contact
 
