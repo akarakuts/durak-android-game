@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.3] - 2026-07-13
+
+### Changed
+
+- RuStore screenshots: crop bottom navigation bar by default in capture script.
+
 ## [1.2.2] - 2026-07-13
 
 ### Fixed
