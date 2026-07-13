@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.2] - 2026-07-13
+
+### Fixed
+
+- Home screen: hero, title, subtitle, and menu buttons centered horizontally.
+
 ## [1.2.1] - 2026-07-13
 
 ### Changed

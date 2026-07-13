@@ -33,9 +33,12 @@ class HomeScreen extends ConsumerWidget {
                 minHeight:
                     (constraints.maxHeight - 40).clamp(0, double.infinity),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+              child: SizedBox(
+                width: constraints.maxWidth,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
                   const HomeHeroWidget(),
                   const SizedBox(height: 24),
                   const Padding(
@@ -57,6 +60,7 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 10),
                   Text(
                     AppStrings.homeSubtitle,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white.withValues(alpha: 0.8),
@@ -102,6 +106,7 @@ class HomeScreen extends ConsumerWidget {
                     () => _showRules(context),
                   ),
                 ],
+                ),
               ),
             ),
           ),
