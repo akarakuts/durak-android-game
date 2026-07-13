@@ -1,4 +1,4 @@
-// Веер карт в руке игрока с overlap и подсветкой доступных ходов.
+/// Веер карт в руке игрока с overlap и подсветкой доступных ходов.
 import 'package:flutter/material.dart';
 import '../models/card.dart';
 import 'card_widget.dart';

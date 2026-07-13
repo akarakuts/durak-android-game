@@ -1,4 +1,4 @@
-// CardBackPattern — орнамент рубашки карты для [CardWidget].
+/// CardBackPattern — орнамент рубашки карты для [CardWidget].
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 

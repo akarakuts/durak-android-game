@@ -1,4 +1,4 @@
-// HomeHeroWidget — декоративный веер карт на главном экране.
+/// HomeHeroWidget — декоративный веер карт на главном экране.
 import 'package:flutter/material.dart';
 import '../models/card.dart';
 import '../utils/constants.dart';
@@ -19,16 +19,16 @@ class HomeHeroWidget extends StatelessWidget {
     return Semantics(
       label: 'Подкидной дурак',
       child: SizedBox(
-        width: 240,
+        width: 228,
         height: 156,
         child: Stack(
-          clipBehavior: Clip.hardEdge,
+          clipBehavior: Clip.none,
           alignment: Alignment.center,
           children: [
-            _fanCard(angle: -0.38, dx: -52, dy: 10, scale: 0.88),
-            _fanCard(angle: -0.16, dx: -26, dy: 4, scale: 0.92),
-            _fanCard(angle: 0.16, dx: 26, dy: 4, scale: 0.92),
-            _fanCard(angle: 0.38, dx: 52, dy: 10, scale: 0.88),
+            _fanCard(angle: -0.38, dx: -58, dy: 10, scale: 0.88),
+            _fanCard(angle: -0.16, dx: -30, dy: 4, scale: 0.92),
+            _fanCard(angle: 0.16, dx: 30, dy: 4, scale: 0.92),
+            _fanCard(angle: 0.38, dx: 58, dy: 10, scale: 0.88),
             Transform.translate(
               offset: const Offset(0, -8),
               child: DecoratedBox(

@@ -1,4 +1,4 @@
-// Виджет одной карты: лицо/рубашка, Semantics и тактильная отдача.
+/// Виджет одной карты: лицо/рубашка, Semantics и тактильная отдача.
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';

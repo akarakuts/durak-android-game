@@ -31,7 +31,7 @@ jobs:
         ./
 
   codeql:
-    name: CodeQL (Java/Kotlin)
+    name: CodeQL (Dart)
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -46,7 +46,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
-          languages: java-kotlin
+          languages: dart
           build-mode: manual
 
       - uses: actions/setup-java@v5

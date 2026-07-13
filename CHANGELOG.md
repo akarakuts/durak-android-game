@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.1] - 2026-07-13
+
+### Changed
+
+- UI refresh: home hero, cards, game table, and launcher icon.
+- RuStore store screenshots: native 1080×1920 capture, status bar removed, full UI visible.
+- Version bump for RuStore resubmission.
+
+## [1.0.5] - 2026-07-11
+
+### Changed
+
+- RuStore release build (version bump).
+
 ## [1.0.4] - 2026-07-08
 
 ### Fixed

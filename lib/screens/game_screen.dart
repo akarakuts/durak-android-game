@@ -1,4 +1,4 @@
-// Экран партии: стол, руки, баннер хода и кнопки действий.
+/// Экран партии: стол, руки, баннер хода и кнопки действий.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/card.dart';

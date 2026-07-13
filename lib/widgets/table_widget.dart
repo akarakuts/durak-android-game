@@ -1,4 +1,4 @@
-// Стол: пары атака/защита и горизонтальная прокрутка при длинном раунде.
+/// Стол: пары атака/защита и горизонтальная прокрутка при длинном раунде.
 import 'package:flutter/material.dart';
 import '../models/game.dart';
 import 'card_widget.dart';

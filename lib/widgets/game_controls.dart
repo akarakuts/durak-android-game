@@ -1,4 +1,4 @@
-// Нижняя панель действий: взять карты, пас, новая игра.
+/// Нижняя панель действий: взять карты, пас, новая игра.
 import 'package:flutter/material.dart';
 import '../models/game.dart';
 import '../l10n/app_strings.dart';
