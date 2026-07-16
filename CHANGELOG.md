@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.4] - 2026-07-16
+
+### Fixed
+
+- Restored launcher and store icons to the published Ace-of-Spades design so the APK matches the RuStore listing.
+
 ## [1.2.3] - 2026-07-13
 
 ### Changed
